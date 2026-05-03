@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import CryptoCard from './components/CryptoCard';
+import CryptoDetailPanel from './components/CryptoDetailPanel';
 import { initialCryptoData } from './data/mockData';
 import './App.css';
 
@@ -33,7 +34,6 @@ const generateInitialSparklineData = (
   const startPrice = currentPrice / (1 + change24h / 100);
   const trendPerPoint = (currentPrice - startPrice) / (points - 1);
   
-  let currentValue = startPrice;
   const volatility = currentPrice * 0.015;
   
   for (let i = 0; i < points; i++) {
@@ -44,7 +44,7 @@ const generateInitialSparklineData = (
     } else {
       const baseValue = startPrice + trendPerPoint * i;
       const randomNoise = (Math.random() - 0.5) * volatility;
-      currentValue = baseValue + randomNoise;
+      const currentValue = baseValue + randomNoise;
       data.push(currentValue);
     }
   }
@@ -104,6 +104,7 @@ const App: React.FC = () => {
   const [priceChanges, setPriceChanges] = useState<PriceChangeMap>({});
   const [displayedIds, setDisplayedIds] = useState<string[]>(getInitialSortedIds);
   const [sparklineDataMap, setSparklineDataMap] = useState<SparklineDataMap>(getInitialSparklineData);
+  const [selectedCrypto, setSelectedCrypto] = useState<CryptoCurrency | null>(null);
 
   const cryptoMap = useMemo(() => {
     return new Map(cryptos.map((c) => [c.id, c]));
@@ -300,10 +301,18 @@ const App: React.FC = () => {
               rank={index + 1}
               priceChanged={priceChanges[crypto.id] || null}
               sparklineData={sparklineDataMap[crypto.id] || []}
+              onClick={() => setSelectedCrypto(crypto)}
             />
           ))}
         </div>
       </div>
+      
+      {selectedCrypto && (
+        <CryptoDetailPanel
+          crypto={selectedCrypto}
+          onClose={() => setSelectedCrypto(null)}
+        />
+      )}
     </div>
   );
 };
