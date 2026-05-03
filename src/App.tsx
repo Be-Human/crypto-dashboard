@@ -17,9 +17,40 @@ interface CryptoCurrency {
 type SortDirection = 'asc' | 'desc';
 type SortField = 'price' | 'change24h' | 'name';
 type PriceChangeMap = Record<string, 'up' | 'down' | null>;
+type SparklineDataMap = Record<string, number[]>;
 
 const defaultSortField: SortField = 'change24h';
 const defaultSortDirection: SortDirection = 'desc';
+const SPARKLINE_POINTS = 24;
+
+const generateInitialSparklineData = (
+  currentPrice: number,
+  change24h: number,
+  points: number = SPARKLINE_POINTS
+): number[] => {
+  const data: number[] = [];
+  
+  const startPrice = currentPrice / (1 + change24h / 100);
+  const trendPerPoint = (currentPrice - startPrice) / (points - 1);
+  
+  let currentValue = startPrice;
+  const volatility = currentPrice * 0.015;
+  
+  for (let i = 0; i < points; i++) {
+    if (i === 0) {
+      data.push(startPrice);
+    } else if (i === points - 1) {
+      data.push(currentPrice);
+    } else {
+      const baseValue = startPrice + trendPerPoint * i;
+      const randomNoise = (Math.random() - 0.5) * volatility;
+      currentValue = baseValue + randomNoise;
+      data.push(currentValue);
+    }
+  }
+  
+  return data;
+};
 
 const sortCryptosFn = (
   cryptosToSort: CryptoCurrency[],
@@ -53,6 +84,17 @@ const getInitialSortedIds = (): string[] => {
   return sorted.map((c) => c.id);
 };
 
+const getInitialSparklineData = (): SparklineDataMap => {
+  const data: SparklineDataMap = {};
+  for (const crypto of initialCryptoData) {
+    data[crypto.id] = generateInitialSparklineData(
+      crypto.price,
+      crypto.change24h
+    );
+  }
+  return data;
+};
+
 const App: React.FC = () => {
   const [cryptos, setCryptos] = useState<CryptoCurrency[]>(
     initialCryptoData as CryptoCurrency[]
@@ -61,6 +103,7 @@ const App: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection);
   const [priceChanges, setPriceChanges] = useState<PriceChangeMap>({});
   const [displayedIds, setDisplayedIds] = useState<string[]>(getInitialSortedIds);
+  const [sparklineDataMap, setSparklineDataMap] = useState<SparklineDataMap>(getInitialSparklineData);
 
   const cryptoMap = useMemo(() => {
     return new Map(cryptos.map((c) => [c.id, c]));
@@ -75,6 +118,7 @@ const App: React.FC = () => {
   const simulatePriceChange = useCallback(() => {
     setCryptos((prevCryptos) => {
       const newPriceChanges: PriceChangeMap = {};
+      const newSparklineUpdates: Record<string, number> = {};
       
       const newCryptos = prevCryptos.map((crypto) => {
         const priceChangePercent = (Math.random() - 0.5) * 0.02;
@@ -89,6 +133,8 @@ const App: React.FC = () => {
           newPriceChanges[crypto.id] = priceChanged;
         }
         
+        newSparklineUpdates[crypto.id] = newPrice;
+        
         return {
           ...crypto,
           price: newPrice,
@@ -96,6 +142,22 @@ const App: React.FC = () => {
           marketCap: crypto.marketCap * (1 + (Math.random() - 0.5) * 0.01),
           volume24h: crypto.volume24h * (1 + (Math.random() - 0.5) * 0.02),
         };
+      });
+      
+      setSparklineDataMap((prevMap) => {
+        const newMap: SparklineDataMap = {};
+        for (const [id, prevData] of Object.entries(prevMap)) {
+          const newPrice = newSparklineUpdates[id];
+          if (newPrice !== undefined) {
+            const newData = [...prevData];
+            newData.shift();
+            newData.push(newPrice);
+            newMap[id] = newData;
+          } else {
+            newMap[id] = prevData;
+          }
+        }
+        return newMap;
       });
       
       setPriceChanges(newPriceChanges);
@@ -237,6 +299,7 @@ const App: React.FC = () => {
               crypto={crypto}
               rank={index + 1}
               priceChanged={priceChanges[crypto.id] || null}
+              sparklineData={sparklineDataMap[crypto.id] || []}
             />
           ))}
         </div>
