@@ -17,6 +17,7 @@ interface CryptoCardProps {
   rank: number;
   priceChanged?: 'up' | 'down' | null;
   sparklineData?: number[];
+  onClick?: () => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -52,13 +53,13 @@ const formatLargeNumber = (num: number): string => {
   }).format(num);
 };
 
-const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, rank, priceChanged, sparklineData = [] }) => {
+const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, rank, priceChanged, sparklineData = [], onClick }) => {
   const isPositive = crypto.change24h >= 0;
-  const cardClassName = `crypto-card ${!isPositive ? 'negative' : ''}`;
+  const cardClassName = `crypto-card ${!isPositive ? 'negative' : ''} ${onClick ? 'clickable' : ''}`;
   const changeClassName = `price-change ${isPositive ? 'positive' : 'negative'}`;
 
   return (
-    <div className={cardClassName}>
+    <div className={cardClassName} onClick={onClick}>
       <div className="card-header">
         <div className="crypto-info">
           <div className="crypto-icon">{crypto.icon}</div>
