@@ -1,12 +1,4 @@
-export interface CandlestickData {
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  timestamp: number;
-}
-
-export type TimeFrame = 'day' | 'week' | 'month';
+import type { CandlestickData, TimeFrame } from '../types';
 
 const generateCandlestick = (
   startPrice: number,
