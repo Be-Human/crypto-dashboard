@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import Sparkline from './Sparkline';
 
 interface CryptoCurrency {
@@ -16,6 +16,7 @@ interface CryptoCardProps {
   crypto: CryptoCurrency;
   rank: number;
   priceChanged?: 'up' | 'down' | null;
+  sparklineData?: number[];
 }
 
 const formatPrice = (price: number): string => {
@@ -51,43 +52,10 @@ const formatLargeNumber = (num: number): string => {
   }).format(num);
 };
 
-const generateSparklineData = (
-  currentPrice: number,
-  change24h: number,
-  points: number = 24
-): number[] => {
-  const data: number[] = [];
-  
-  const startPrice = currentPrice / (1 + change24h / 100);
-  const trendPerPoint = (currentPrice - startPrice) / (points - 1);
-  
-  let currentValue = startPrice;
-  const volatility = currentPrice * 0.015;
-  
-  for (let i = 0; i < points; i++) {
-    if (i === 0) {
-      data.push(startPrice);
-    } else if (i === points - 1) {
-      data.push(currentPrice);
-    } else {
-      const baseValue = startPrice + trendPerPoint * i;
-      const randomNoise = (Math.random() - 0.5) * volatility;
-      currentValue = baseValue + randomNoise;
-      data.push(currentValue);
-    }
-  }
-  
-  return data;
-};
-
-const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, rank, priceChanged }) => {
+const CryptoCard: React.FC<CryptoCardProps> = ({ crypto, rank, priceChanged, sparklineData = [] }) => {
   const isPositive = crypto.change24h >= 0;
   const cardClassName = `crypto-card ${!isPositive ? 'negative' : ''}`;
   const changeClassName = `price-change ${isPositive ? 'positive' : 'negative'}`;
-  
-  const sparklineData = useMemo(() => {
-    return generateSparklineData(crypto.price, crypto.change24h, 24);
-  }, [crypto.price, crypto.change24h]);
 
   return (
     <div className={cardClassName}>
