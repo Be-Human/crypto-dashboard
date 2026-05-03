@@ -279,6 +279,23 @@
   letter-spacing: 0.05em;
 }
 
+.sparkline-section {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--border-color);
+}
+
+.sparkline {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 .card-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
