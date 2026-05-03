@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CandlestickData } from '../utils/klineData';
+import type { CandlestickData } from '../types';
 
 interface CandlestickChartProps {
   data: CandlestickData[];

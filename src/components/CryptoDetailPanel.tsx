@@ -1,20 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import CandlestickChart from './CandlestickChart';
-import { 
-  generateKlineData, 
-  TimeFrame 
-} from '../utils/klineData';
-
-interface CryptoCurrency {
-  id: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change24h: number;
-  marketCap: number;
-  volume24h: number;
-  icon: string;
-}
+import { generateKlineData } from '../utils/klineData';
+import type { TimeFrame, CryptoCurrency } from '../types';
 
 interface CryptoDetailPanelProps {
   crypto: CryptoCurrency;
