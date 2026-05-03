@@ -18,11 +18,59 @@ type SortDirection = 'asc' | 'desc';
 type SortField = 'price' | 'change24h' | 'name';
 type PriceChangeMap = Record<string, 'up' | 'down' | null>;
 
+const defaultSortField: SortField = 'change24h';
+const defaultSortDirection: SortDirection = 'desc';
+
+const sortCryptosFn = (
+  cryptosToSort: CryptoCurrency[],
+  field: SortField,
+  direction: SortDirection
+): CryptoCurrency[] => {
+  const sorted = [...cryptosToSort].sort((a, b) => {
+    let comparison = 0;
+    switch (field) {
+      case 'price':
+        comparison = a.price - b.price;
+        break;
+      case 'change24h':
+        comparison = a.change24h - b.change24h;
+        break;
+      case 'name':
+        comparison = a.name.localeCompare(b.name);
+        break;
+    }
+    return direction === 'asc' ? comparison : -comparison;
+  });
+  return sorted;
+};
+
+const getInitialSortedIds = (): string[] => {
+  const sorted = sortCryptosFn(
+    initialCryptoData as CryptoCurrency[],
+    defaultSortField,
+    defaultSortDirection
+  );
+  return sorted.map((c) => c.id);
+};
+
 const App: React.FC = () => {
-  const [cryptos, setCryptos] = useState<CryptoCurrency[]>(initialCryptoData as CryptoCurrency[]);
-  const [sortField, setSortField] = useState<SortField>('change24h');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [cryptos, setCryptos] = useState<CryptoCurrency[]>(
+    initialCryptoData as CryptoCurrency[]
+  );
+  const [sortField, setSortField] = useState<SortField>(defaultSortField);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection);
   const [priceChanges, setPriceChanges] = useState<PriceChangeMap>({});
+  const [displayedIds, setDisplayedIds] = useState<string[]>(getInitialSortedIds);
+
+  const cryptoMap = useMemo(() => {
+    return new Map(cryptos.map((c) => [c.id, c]));
+  }, [cryptos]);
+
+  const displayedCryptos = useMemo(() => {
+    return displayedIds
+      .map((id) => cryptoMap.get(id))
+      .filter((c): c is CryptoCurrency => c !== undefined);
+  }, [displayedIds, cryptoMap]);
 
   const simulatePriceChange = useCallback(() => {
     setCryptos((prevCryptos) => {
@@ -65,33 +113,28 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [simulatePriceChange]);
 
-  const handleSort = useCallback((field: SortField) => {
-    if (sortField === field) {
-      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  }, [sortField]);
-
-  const sortedCryptos = useMemo(() => {
-    const sorted = [...cryptos].sort((a, b) => {
-      let comparison = 0;
-      switch (sortField) {
-        case 'price':
-          comparison = a.price - b.price;
-          break;
-        case 'change24h':
-          comparison = a.change24h - b.change24h;
-          break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
+  const handleSort = useCallback(
+    (field: SortField) => {
+      let newSortDirection: SortDirection;
+      
+      if (sortField === field) {
+        newSortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        setSortDirection(newSortDirection);
+      } else {
+        setSortField(field);
+        newSortDirection = 'desc';
+        setSortDirection(newSortDirection);
       }
-      return sortDirection === 'asc' ? comparison : -comparison;
-    });
-    return sorted;
-  }, [cryptos, sortField, sortDirection]);
+      
+      const sorted = sortCryptosFn(
+        cryptos,
+        field,
+        sortField === field ? newSortDirection : 'desc'
+      );
+      setDisplayedIds(sorted.map((c) => c.id));
+    },
+    [sortField, sortDirection, cryptos]
+  );
 
   const stats = useMemo(() => {
     const totalMarketCap = cryptos.reduce((sum, c) => sum + c.marketCap, 0);
@@ -188,7 +231,7 @@ const App: React.FC = () => {
         </div>
 
         <div className="crypto-grid">
-          {sortedCryptos.map((crypto, index) => (
+          {displayedCryptos.map((crypto, index) => (
             <CryptoCard
               key={crypto.id}
               crypto={crypto}
