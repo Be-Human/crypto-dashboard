@@ -1,0 +1,143 @@
+:root {
+  --bg-primary: #0d0d1a;
+  --bg-secondary: #14142b;
+  --bg-tertiary: #1a1a38;
+  --bg-card: #1e1e3f;
+  --bg-hover: #26264d;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0c0;
+  --text-tertiary: #6b6b9d;
+  
+  --color-green: #00d4aa;
+  --color-green-light: #33e0bb;
+  --color-green-dark: #00a888;
+  
+  --color-red: #ff4757;
+  --color-red-light: #ff6b7a;
+  --color-red-dark: #cc3a46;
+  
+  --border-color: #2a2a50;
+  --border-light: #3a3a6a;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+  
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+button {
+  font-family: var(--font-primary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, select {
+  font-family: var(--font-primary);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes priceUp {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(0, 212, 170, 0.15);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes priceDown {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 71, 87, 0.15);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.price-up {
+  animation: priceUp 0.5s ease;
+}
+
+.price-down {
+  animation: priceDown 0.5s ease;
+}
